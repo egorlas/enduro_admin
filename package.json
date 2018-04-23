@@ -1,11 +1,13 @@
 {
   "name": "enduro_admin",
-  "version": "1.0.72",
+  "version": "1.0.73",
   "description": "",
   "main": "assets/vendor/enduro/index.js",
   "scripts": {
     "test": "mocha --recursive --bail && node uitest/enduro_uitest",
-    "uitest": ""
+    "uitest": "",
+    "render": "enduro render",
+    "render:watch": "watch 'npm run render' assets/ cms/ components/ pages/"
   },
   "author": "Martin Gottweis",
   "license": "MIT",
@@ -14,12 +16,13 @@
     "casper-chai": "^0.3.0",
     "casperjs": "^1.1.4",
     "chai": "^4.0.2",
-    "enduro": "1.4.24",
+    "enduro": "github:maxmedia/Enduro#v1.4.45.mxm.1",
     "glob": "^7.1.2",
     "jsdom": "^11.0.0",
     "mocha": "^3.4.2",
     "mocha-casperjs": "^0.6.0",
-    "rimraf": "^2.6.1"
+    "rimraf": "^2.6.1",
+    "watch": "1.0.2"
   },
   "repository": {
     "type": "git",

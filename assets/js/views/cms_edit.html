@@ -5,8 +5,17 @@
 			<i class="fa fa-search"></i>
 			<div ng-include="'/admin/components/page_search/page_search_results/index.html'"></div>
 		</div>
-		<div class="btn btn-minor small publish-button" ng-click="temp()" ng-class="{'publishing': temping}" ng-if="has_page_associated"><i class="fa fa-bolt"></i>Temp</div>
-		<div class="btn btn-success small publish-button" ng-click="publish()" ng-class="{'publishing': publishing, 'disabled': is_demo}"><i class="fa fa-cloud"></i>Publish</div>
+		<div class="btn btn-minor small publish-button" ng-click="temp()" ng-class="{'publishing': temping}" disabled="!has_page_associated"><i class="fa fa-bolt"></i>Preview</div>
+		<div class="btn btn-success small publish-button" ng-click="save()" ng-class="{'publishing': saving, 'disabled': is_demo}"><i class="fa fa-check"></i>Save</div>
+		<div
+			class="btn btn-success small publish-button"
+			ng-disabled="!user.tags.includes('publisher')"
+			ng-click="publish()"
+			ng-class="{'publishing': publishing, 'disabled': !user.tags.includes('publisher') || is_demo}"
+		>
+			<i class="fa fa-gears"></i>
+			Publish
+		</div>
 	</div>
 	<div class="page-viewport">
 		<div class="panel">
@@ -19,6 +28,9 @@
 				</ul>
 
 				<ul class="page-action-box">
+					<li ng-click="rename_current_page()" ng-show="deletable">
+						<i class="fa fa-pencil-square-o inline"></i>Rename page
+					</li>
 					<li ng-click="delete_current_page()" ngtooltipster title="The most current version of the page will still be recoverable in the juicebox" ng-show="deletable"><i class="fa fa-trash-o inline"></i>Delete page</li>
 				</ul>
 

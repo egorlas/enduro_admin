@@ -1,0 +1,8 @@
+.user-edit {
+  input.ng-invalid, input.unconfirmed {
+    border-bottom-color: red;
+  }
+  button[disabled] {
+    background-color: #ccc;
+  }
+}

@@ -2,8 +2,52 @@
 // * 	cms editor controller
 // *	main controller for cms editor
 // * ———————————————————————————————————————————————————————— * //
-enduro_admin_app.controller('cms-editor-controller', ['$scope', '$rootScope', '$routeParams', 'content_service', 'culture_service', 'hotkeys',
-	function ($scope, $rootScope, $routeParams, content_service, culture_service, hotkeys) {
+enduro_admin_app.controller('cms-editor-controller', ['$scope', '$rootScope', '$routeParams', 'content_service', 'culture_service', 'hotkeys', 'modal_service',
+	function ($scope, $rootScope, $routeParams, content_service, culture_service, hotkeys, modal_service) {
+
+		// adding hotkeys
+		var hotkeys_handler = hotkeys.bindTo($scope)
+
+		hotkeys_handler
+			.add({
+				// publish hotkey
+				combo: ['mod+s', 'mod+enter'],
+				description: 'Publish current page',
+				allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+				callback: function (e) {
+					e.preventDefault()
+					$scope.publish()
+				}
+			})
+			.add({
+				// temp hotkey
+				combo: ['mod+d', 'mod+t'],
+				description: 'Temp current page',
+				allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+				callback: function (e) {
+					e.preventDefault()
+					$scope.temp()
+				}
+			})
+			.add({
+				// search for page hotkey
+				combo: ['mod+p'],
+				description: 'Search for page',
+				allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+				callback: function (e) {
+					e.preventDefault()
+					$('.page-search-input').focus()
+				}
+			})
+			.add({
+				// search for page hotkey
+				combo: ['mod+l'],
+				description: 'log context',
+				callback: function (e) {
+					e.preventDefault()
+					console.log($scope.context)
+				}
+			})
 
 		// get page specified in route
 		content_service.get_content($rootScope.current_page)
@@ -75,15 +119,40 @@ enduro_admin_app.controller('cms-editor-controller', ['$scope', '$rootScope', '$
 		// *
 		// *	returns nothing
 		// * ———————————————————————————————————————————————————————— * //
-		$scope.publish = function () {
-			$scope.publishing = true
+		$scope.save = function () {
+			$scope.saving = true
 
 			content_service.save_content($rootScope.current_page, $scope.context)
-				.then(function () {
+				.then(function (new_context) {
+					if (new_context) {
+						$scope.context = new_context
+						window.location.reload()
+					}
 					content_service.update_outstanding_changes()
-					$scope.publishing = false
+					$scope.saving = false
 				}, function () {
 					console.log('something went wrong with saving the data')
+					$scope.saving = false
+				})
+		}
+
+		// * ———————————————————————————————————————————————————————— * //
+		// * 	change culture
+		// *	saves context
+		// *
+		// *	returns nothing
+		// * ———————————————————————————————————————————————————————— * //
+		$scope.publish = function () {
+			if (!$rootScope.user.tags.includes('publisher')) {
+				return
+			}
+
+			$scope.publishing = true
+
+			modal_service.open('publishing_modal')
+				.then(function () {
+					$scope.publishing = false
+				}, function () {
 					$scope.publishing = false
 				})
 		}
@@ -118,17 +187,15 @@ enduro_admin_app.controller('cms-editor-controller', ['$scope', '$rootScope', '$
 		// *	returns nothing
 		// * ———————————————————————————————————————————————————————— * //
 		$scope.delete_current_page = function () {
-			content_service.delete_page($rootScope.current_page)
-				.then(function (res) {
-					console.log(res)
-				})
+			$rootScope.modal = '/admin/modals/delete_page_modal/index.html'
+		}
 
-			// delete page from the cmslist
-			// console.log($rootScope.cmslist)
+		$scope.rename_current_page = function () {
+			$rootScope.modal = '/admin/modals/rename_page_modal/index.html'
 		}
 
 		// decides if the application is demo
-		$scope.is_demo = $rootScope.user.tags && $rootScope.user.tags.indexOf('demo') + 1
+		$scope.is_demo = $rootScope.user && $rootScope.user.tags && $rootScope.user.tags.indexOf('demo') + 1
 
 		// Helper functions
 		$scope.isString = function (item) { return angular.isString(item) }
@@ -144,49 +211,4 @@ enduro_admin_app.controller('cms-editor-controller', ['$scope', '$rootScope', '$
 			}
 			return false
 		}
-
-		// adding hotkeys
-		var hotkeys_handler = hotkeys.bindTo($scope)
-
-		hotkeys_handler
-			.add({
-				// publish hotkey
-				combo: ['mod+s', 'mod+enter'],
-				description: 'Publish current page',
-				allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
-				callback: function (e) {
-					e.preventDefault()
-					$scope.publish()
-				}
-			})
-			.add({
-				// temp hotkey
-				combo: ['mod+d', 'mod+t'],
-				description: 'Temp current page',
-				allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
-				callback: function (e) {
-					e.preventDefault()
-					$scope.temp()
-				}
-			})
-			.add({
-				// search for page hotkey
-				combo: ['mod+p'],
-				description: 'Search for page',
-				allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
-				callback: function (e) {
-					e.preventDefault()
-					$('.page-search-input').focus()
-				}
-			})
-			.add({
-				// search for page hotkey
-				combo: ['mod+l'],
-				description: 'log context',
-				callback: function (e) {
-					e.preventDefault()
-					console.log($scope.context)
-				}
-			})
-
 	}])
